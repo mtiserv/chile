@@ -55,6 +55,9 @@
         <!-- MOBILE TOP HEADER (Visible only on mobile screens <= 768px) -->
         <header id="mobile-app-header" class="mobile-header">
             <div class="mobile-header-brand">
+                <button onclick="toggleMobileDrawer()" class="btn-mobile-action" style="background: transparent; border: 1px solid var(--border-color);" title="Menú">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
                 <img src="data/logo.png" alt="Logo MTI" class="mobile-logo" />
                 <div class="mobile-brand-title">
                     <strong>MTI Servicios</strong>
@@ -1570,6 +1573,72 @@
         </div>
     </div>
 
+    <!-- MOBILE DRAWER MENU OVERLAY (Acceso a todas las funciones en celulares) -->
+    <div id="mobile-drawer-overlay" class="mobile-drawer-overlay" onclick="closeMobileDrawer(event)">
+        <div class="mobile-drawer-content" onclick="event.stopPropagation()">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <img src="data/logo.png" style="height: 24px;" alt="Logo" />
+                    <strong style="color: var(--text-primary); font-size: 14px;">Menú MTI Servicios</strong>
+                </div>
+                <button onclick="toggleMobileDrawer()" class="btn-secondary" style="padding: 4px 8px; font-size: 12px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- MOBILE TENANT SELECTOR -->
+            <div style="display: flex; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <div>
+                    <label class="form-label" style="font-size: 10px;"><i class="fa-solid fa-building"></i> Cliente / Empresa</label>
+                    <select id="mobile-client-select" class="form-select" onchange="syncMobileTenant('client', this.value)">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label" style="font-size: 10px;"><i class="fa-solid fa-location-dot"></i> Centro de Cultivo</label>
+                    <select id="mobile-center-select" class="form-select" onchange="syncMobileTenant('center', this.value)">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- ALL NAVIGATION OPTIONS -->
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;">
+                <li onclick="navigateMobileDrawer('dashboard')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-chart-pie" style="width: 20px; color: var(--accent-blue);"></i> Dashboard
+                </li>
+                <li onclick="navigateMobileDrawer('inventario')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-boxes-stacked" style="width: 20px; color: var(--accent-teal);"></i> Catálogo Equipos
+                </li>
+                <li onclick="navigateMobileDrawer('planner')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-calendar-check" style="width: 20px; color: #f59e0b;"></i> Plan 1 Año (2026)
+                </li>
+                <li onclick="navigateMobileDrawer('work-orders')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-file-invoice" style="width: 20px; color: #8b5cf6;"></i> Órdenes de Trabajo
+                </li>
+                <li onclick="navigateMobileDrawer('trabajo-actual')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-diagram-project" style="width: 20px; color: #10b981;"></i> Proyectos Vivos (Mesa)
+                </li>
+                <li onclick="navigateMobileDrawer('repuestos')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-gears" style="width: 20px; color: #06b6d4;"></i> Repuestos Críticos
+                </li>
+                <li onclick="navigateMobileDrawer('historial')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-clock-rotate-left" style="width: 20px; color: #ec4899;"></i> Historial Servicios
+                </li>
+                <li onclick="navigateMobileDrawer('database')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-database" style="width: 20px; color: #3b82f6;"></i> Base de Datos
+                </li>
+                <li onclick="navigateMobileDrawer('info-general')" style="padding: 10px 12px; border-radius: 6px; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 13px;">
+                    <i class="fa-solid fa-book" style="width: 20px; color: #a855f7;"></i> Información General
+                </li>
+            </ul>
+
+            <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 12px;">
+                <button onclick="logout()" class="btn-secondary" style="width: 100%; color: var(--accent-danger); border-color: rgba(244,63,94,0.3); font-weight: 600;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE BOTTOM NAVIGATION BAR (Visible only on mobile screens <= 768px) -->
     <nav id="mobile-bottom-nav" class="mobile-bottom-bar">
         <button class="mobile-nav-item active" data-tab="dashboard" onclick="switchMobileTab('dashboard')">
@@ -1584,13 +1653,13 @@
             <i class="fa-solid fa-boxes-stacked"></i>
             <span>Equipos</span>
         </button>
-        <button class="mobile-nav-item" data-tab="planner" onclick="switchMobileTab('planner')">
-            <i class="fa-solid fa-calendar-check"></i>
-            <span>Plan 1Año</span>
-        </button>
         <button class="mobile-nav-item" data-tab="historial" onclick="switchMobileTab('historial')">
             <i class="fa-solid fa-clock-rotate-left"></i>
             <span>Historial</span>
+        </button>
+        <button class="mobile-nav-item" onclick="toggleMobileDrawer()">
+            <i class="fa-solid fa-bars"></i>
+            <span>Menú</span>
         </button>
     </nav>
 

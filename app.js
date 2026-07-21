@@ -5737,6 +5737,59 @@ function switchMobileTab(tabName) {
     }
 }
 
+function toggleMobileDrawer() {
+    const drawer = document.getElementById("mobile-drawer-overlay");
+    if (!drawer) return;
+    drawer.classList.toggle("active");
+    if (drawer.classList.contains("active")) {
+        syncMobileDrawerTenantSelectors();
+    }
+}
+
+function closeMobileDrawer(e) {
+    const drawer = document.getElementById("mobile-drawer-overlay");
+    if (drawer) drawer.classList.remove("active");
+}
+
+function syncMobileDrawerTenantSelectors() {
+    const globalClient = document.getElementById("global-client-select");
+    const globalCenter = document.getElementById("global-center-select");
+    const mobileClient = document.getElementById("mobile-client-select");
+    const mobileCenter = document.getElementById("mobile-center-select");
+
+    if (globalClient && mobileClient) {
+        mobileClient.innerHTML = globalClient.innerHTML;
+        mobileClient.value = globalClient.value;
+    }
+    if (globalCenter && mobileCenter) {
+        mobileCenter.innerHTML = globalCenter.innerHTML;
+        mobileCenter.value = globalCenter.value;
+    }
+}
+
+function syncMobileTenant(type, val) {
+    if (type === 'client') {
+        const globalClient = document.getElementById("global-client-select");
+        if (globalClient) {
+            globalClient.value = val;
+            globalClient.dispatchEvent(new Event('change'));
+        }
+    } else if (type === 'center') {
+        const globalCenter = document.getElementById("global-center-select");
+        if (globalCenter) {
+            globalCenter.value = val;
+            globalCenter.dispatchEvent(new Event('change'));
+        }
+        const mobileCenterName = document.getElementById("mobile-center-name");
+        if (mobileCenterName) mobileCenterName.innerText = val;
+    }
+}
+
+function navigateMobileDrawer(tabName) {
+    toggleMobileDrawer();
+    switchMobileTab(tabName);
+}
+
 // Proyectos Vivos & Mobile window exports
 window.renderProyectosTab = renderProyectosTab;
 window.filtrarEstadoProyecto = filtrarEstadoProyecto;
@@ -5751,5 +5804,10 @@ window.closeModalEditorDossier = closeModalEditorDossier;
 window.confirmarYCerrarProyectoConDrive = confirmarYCerrarProyectoConDrive;
 window.switchMobileTab = switchMobileTab;
 window.compressImageFile = compressImageFile;
+window.toggleMobileDrawer = toggleMobileDrawer;
+window.closeMobileDrawer = closeMobileDrawer;
+window.syncMobileTenant = syncMobileTenant;
+window.navigateMobileDrawer = navigateMobileDrawer;
+
 
 
