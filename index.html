@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTI Servicios Industriales - CMMS & Base de Datos Técnica 2026</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data/logo.png">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <!-- Toast Container (generic notifications) -->
+    <div id="toast-container"></div>
+
+    <!-- ================= AUTHENTICATION OVERLAY ================= -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo-container">
+                <img src="data/logo.png" alt="Logo MTI" class="auth-logo">
+                <h2>MTI Servicios</h2>
+                <p>Gestión de Mantenimiento Industrial</p>
+            </div>
+            <form id="auth-form" class="auth-form">
+                <div class="form-group">
+                    <label for="auth-username">Usuario</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="auth-username" required placeholder="Ingrese su usuario">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="auth-password">Contraseña</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="auth-password" required placeholder="••••••••">
+                    </div>
+                </div>
+                <div id="auth-error-msg" class="auth-error-msg"></div>
+                <button type="submit" id="auth-submit-btn" class="auth-submit-btn">
+                    <span>Iniciar Sesión</span>
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- MOBILE TOP HEADER (Visible only on mobile screens <= 768px) -->
+        <header id="mobile-app-header" class="mobile-header">
+            <div class="mobile-header-brand">
+                <img src="data/logo.png" alt="Logo MTI" class="mobile-logo" />
+                <div class="mobile-brand-title">
+                    <strong>MTI Servicios</strong>
+                    <span id="mobile-center-name">Sta Juana</span>
+                </div>
+            </div>
+            <div class="mobile-header-actions">
+                <button onclick="openModalNuevoProyecto()" class="btn-mobile-action" title="Nuevo Proyecto (Mesa)">
+                    <i class="fa-solid fa-folder-plus"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- SIDEBAR NAVIGATION (Desktop) -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <img src="data/logo.png" class="logo-img" alt="Logo MTI" />
+                <div class="logo-text">MTI</div>
+            </div>
+
+            <!-- TENANT (CLIENT & CENTER) SELECTOR -->
+            <div class="tenant-selector-container">
+                <div class="selector-group">
+                    <label class="selector-label"><i class="fa-solid fa-building"></i> Empresa / Cliente</label>
+                    <select id="global-client-select" class="tenant-select">
+                        <!-- Populated dynamically by JS -->
+                    </select>
+                </div>
+                <div class="selector-group">
+                    <label class="selector-label"><i class="fa-solid fa-location-dot"></i> Centro de Cultivo</label>
+                    <select id="global-center-select" class="tenant-select">
+                        <!-- Populated dynamically by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+
+                <li class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" data-tab="inventario">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                    <span>Catálogo Equipos</span>
+                </li>
+                <li class="nav-item" data-tab="planner">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Plan 1 Año (2026)</span>
+                </li>
+                <li class="nav-item" data-tab="work-orders">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span>Órdenes de Trabajo</span>
+                </li>
+                <li class="nav-item" data-tab="trabajo-actual">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <span>Proyectos Vivos (Mesa)</span>
+                </li>
+                <li class="nav-item" data-tab="repuestos">
+                    <i class="fa-solid fa-gears"></i>
+                    <span>Repuestos Críticos</span>
+                </li>
+                <li class="nav-item" data-tab="historial">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Historial Servicios</span>
+                </li>
+                <li class="nav-item" data-tab="database">
+                    <i class="fa-solid fa-database"></i>
+                    <span>Base de Datos</span>
+                </li>
+                <li class="nav-item" data-tab="info-general">
+                    <i class="fa-solid fa-book"></i>
+                    <span>Información General</span>
+                </li>
+            </ul>
+
+            <!-- PWA Install Button -->
+            <button id="pwa-install-btn" class="btn-primary" style="display: none; align-items: center; justify-content: center; gap: 8px; font-size: 12px; height: 34px; padding: 0 12px; margin-bottom: 16px; width: 100%; background-color: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-blue); color: var(--accent-blue-glow); border-radius: 6px; cursor: pointer; font-weight: 600; transition: all var(--transition-normal);">
+                <i class="fa-solid fa-mobile-screen"></i> Instalar App Móvil
+            </button>
+
+            <div class="sidebar-footer">
+                <span>MTI Servicios Industriales</span>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-title">
+                    <h1 id="app-title-display">MTI Servicios Industriales</h1>
+                    <p id="app-subtitle-display">Mantenimiento CERMAQ STA JUANA 2026</p>
+                </div>
+                <div class="header-actions" style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
+                    <div id="sync-badge" class="sync-badge hide" style="display: none; align-items: center; gap: 6px; background-color: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-blue); padding: 6px 12px; border-radius: 6px; color: var(--accent-blue-glow); font-size: 12px; font-weight: 500;">
+                        <i class="fa-solid fa-arrows-rotate fa-spin"></i>
+                        <span id="sync-badge-text">Sincronizando...</span>
+                    </div>
+                    <button id="btn-sync-now" class="btn-secondary" title="Sincronizar ahora con Google Sheets" style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 6px; cursor: pointer; transition: var(--transition-fast); background-color: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary);">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>Sincronizar</span>
+                    </button>
+                    <button id="btn-logout" class="btn-logout" title="Cerrar sesión" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 6px; cursor: pointer; transition: var(--transition-fast); background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171;">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- ============================================== -->
+            <!-- 1. DASHBOARD VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-dashboard" class="tab-panel active">
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fa-solid fa-server"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">Total Equipos</span>
+                            <span class="kpi-value" id="kpi-total-equipos">0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fa-solid fa-bolt"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">Potencia Instalada</span>
+                            <span class="kpi-value" id="kpi-potencia">0 KW</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">Alertas Activas</span>
+                            <span class="kpi-value" id="kpi-alertas">0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">Operatividad</span>
+                            <span class="kpi-value" id="kpi-operatividad">100%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"
+                            style="background-color: rgba(0, 137, 123, 0.08); color: var(--accent-teal-glow);"><i
+                                class="fa-solid fa-hourglass-half"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">MTBF (Confiabilidad)</span>
+                            <span class="kpi-value" id="kpi-mtbf">--</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"
+                            style="background-color: rgba(245, 158, 11, 0.08); color: var(--status-advertencia);"><i
+                                class="fa-solid fa-screwdriver-wrench"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">MTTR (Mantenibilidad)</span>
+                            <span class="kpi-value" id="kpi-mttr">--</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon"
+                            style="background-color: rgba(16, 185, 129, 0.08); color: var(--status-operativo);"><i
+                                class="fa-solid fa-chart-line"></i></div>
+                        <div class="kpi-info">
+                            <span class="kpi-title">Disponibilidad MTI</span>
+                            <span class="kpi-value" id="kpi-disponibilidad">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Critical Equipments -->
+                    <div class="dashboard-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h3 class="panel-title">Equipos de Alta Criticidad (24 Horas)</h3>
+                                <p class="panel-subtitle">Sistemas vitales que requieren inspecciones continuas y cambio
+                                    preventivo de rodamientos.</p>
+                            </div>
+                        </div>
+                        <div class="tasks-list" id="dash-critical-list">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column (Stacked) -->
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                        <!-- Pending Warnings -->
+                        <div class="dashboard-panel" style="flex: 1;">
+                            <div class="panel-header">
+                                <div>
+                                    <h3 class="panel-title">Alertas y Revisiones</h3>
+                                    <p class="panel-subtitle">Equipos que requieren atención inmediata en el próximo
+                                        ciclo.</p>
+                                </div>
+                            </div>
+                            <div class="tasks-list" id="dash-alerts-list">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 2. INVENTORY CATALOG VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-inventario" class="tab-panel">
+                <div class="controls-bar">
+                    <div class="search-wrapper">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="inventory-search" class="search-input"
+                            placeholder="Buscar por ID, nombre de equipo o designación...">
+                    </div>
+
+                    <select id="filter-area" class="filter-select">
+                        <option value="all">Todas las Áreas</option>
+                        <option value="hatchery">Hatchery</option>
+                        <option value="fry">Fry</option>
+                        <option value="smolt">Smolt</option>
+                        <option value="exteriores">Exteriores</option>
+                        <option value="iluminación">Iluminación</option>
+                        <option value="alimentación">Alimentación</option>
+                    </select>
+
+                    <select id="filter-status" class="filter-select">
+                        <option value="all">Todos los Estados</option>
+                        <option value="operativo">Operativo</option>
+                        <option value="alerta">Requiere Revisión</option>
+                        <option value="critico">Alta Criticidad</option>
+                    </select>
+
+                    <button class="btn-secondary" onclick="exportEquipmentExcel()"
+                        style="background-color: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2); color: var(--status-operativo); display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: var(--transition-fast);">
+                        <i class="fa-solid fa-file-excel"></i> Exportar Planilla Excel
+                    </button>
+
+                    <button class="btn-primary" onclick="openAddEquipmentModal()"
+                        style="background-color: var(--accent-blue);">
+                        <i class="fa fa-plus-circle"></i> Nuevo Equipo
+                    </button>
+                </div>
+
+                <div class="panel-header" style="margin-bottom: 20px;">
+                    <h3 class="panel-title" id="inventory-count-badge">0 equipos cargados</h3>
+                </div>
+
+                <div class="equipment-grid" id="inventory-grid">
+                    <!-- Populated dynamically by JavaScript -->
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 3. PREVENTIVE PLANNER VIEW (1-YEAR) -->
+            <!-- ============================================== -->
+            <section id="panel-planner" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px;">
+                    <div>
+                        <h2 class="panel-title">Plan de Trabajo Preventivo de 1 Año</h2>
+                        <p class="panel-subtitle">Cronograma interactivo y minucioso de intervenciones preventivas
+                            mensuales.</p>
+                    </div>
+                </div>
+
+                <div class="planner-layout">
+                    <!-- Months List Navigation -->
+                    <ul class="months-list" id="planner-months-list">
+                        <!-- Populated dynamically by JS -->
+                    </ul>
+
+                    <!-- Month Tasks Checklist -->
+                    <div class="tasks-panel">
+                        <h3 id="selected-month-title" style="margin-bottom: 8px;">Tareas Planificadas - Mes 1</h3>
+                        <p class="panel-subtitle" style="margin-bottom: 12px;">Haz clic en el cuadro de selección para
+                            marcar tareas ejecutadas y actualizar la tasa de operatividad en tiempo real.</p>
+
+                        <!-- PLANNER CONTROLS -->
+                        <div class="planner-controls"
+                            style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; background-color: var(--bg-card); padding: 12px; border: 1px solid var(--border-color); border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;"><i
+                                        class="fa-solid fa-sort"></i> Organizar por:</span>
+                                <select id="planner-sort-by" class="filter-select"
+                                    style="background-color: var(--bg-main); border-color: var(--border-color); padding: 6px 10px; font-size: 12px; height: auto;">
+                                    <option value="none">Por Defecto</option>
+                                    <option value="criticidad">Criticidad (Alta a Baja)</option>
+                                    <option value="area">Área</option>
+                                    <option value="horas">Horas de Operación</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;"><i
+                                        class="fa-solid fa-filter"></i> Criticidad:</span>
+                                <select id="planner-filter-crit" class="filter-select"
+                                    style="background-color: var(--bg-main); border-color: var(--border-color); padding: 6px 10px; font-size: 12px; height: auto;">
+                                    <option value="all">Todas</option>
+                                    <option value="Alta">Alta</option>
+                                    <option value="Media">Media</option>
+                                    <option value="Baja">Baja</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;"><i
+                                        class="fa-solid fa-circle-question"></i> Estado:</span>
+                                <select id="planner-filter-status" class="filter-select"
+                                    style="background-color: var(--bg-main); border-color: var(--border-color); padding: 6px 10px; font-size: 12px; height: auto;">
+                                    <option value="all">Todas</option>
+                                    <option value="pendiente">Pendientes</option>
+                                    <option value="completada">Completadas</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn-secondary" id="btn-planner-complete-all"
+                                style="margin-left: auto; padding: 6px 10px; font-size: 11px; height: auto; background-color: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); color: var(--status-operativo);">
+                                <i class="fa-solid fa-square-check"></i> Marcar Todo Listo
+                            </button>
+                        </div>
+
+                        <div class="tasks-list" id="planner-tasks-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 4. SPARE PARTS VIEW (RODAMIENTOS CRÍTICOS) -->
+            <!-- ============================================== -->
+            <section id="panel-repuestos" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px;">
+                    <div>
+                        <h2 class="panel-title">Planificación de Adquisición de Repuestos Críticos</h2>
+                        <p class="panel-subtitle">Consolidación de rodamientos necesarios según historial de fallas y
+                            plan anual preventivo.</p>
+                    </div>
+                </div>
+
+                <div class="spare-layout">
+                    <!-- Table of critical bearings -->
+                    <div class="rodamientos-table-container">
+                        <h3 style="margin-bottom: 16px;">Catálogo de Rodamientos Principales</h3>
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>Modelo Rodamiento</th>
+                                    <th>Historial Reemplazos</th>
+                                    <th>Demanda Anual Estimada</th>
+                                    <th>Equipos que lo Utilizan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rodamientos-table-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Predictive summary cards -->
+                    <div style="display: flex; flex-direction: column; gap: 20px;">
+                        <div class="dashboard-panel"
+                            style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.02)); border-color: rgba(13, 148, 136, 0.3);">
+                            <h4
+                                style="color: var(--accent-teal-glow); margin-bottom: 8px; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em;">
+                                Estimado de Repuestos Anual</h4>
+                            <div style="font-size: 36px; font-weight: 800; line-height: 1.1;"
+                                id="total-bearings-demand">0 Unidades</div>
+                            <p
+                                style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; line-height: 1.4;">
+                                Cálculo predictivo automático en base a las máquinas programadas para mantenimiento
+                                preventivo anual (Mes 12) y semestral (Mes 6).</p>
+                        </div>
+
+                        <div class="dashboard-panel"
+                            style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(14, 165, 233, 0.02)); border-color: rgba(14, 165, 233, 0.3);">
+                            <h4
+                                style="color: var(--accent-blue-glow); margin-bottom: 8px; text-transform: uppercase; font-size: 12px; letter-spacing: 0.05em;">
+                                Repuesto Más Solicitado</h4>
+                            <div style="font-size: 24px; font-weight: 700;" id="most-critical-bearing">Cargando...</div>
+                            <p
+                                style="font-size: 12px; color: var(--text-secondary); margin-top: 8px; line-height: 1.4;">
+                                El rodamiento más mencionado en las intervenciones históricas de la planta. Se sugiere
+                                mantener este repuesto en stock de bodega local (Bodega Central Piscicultura).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Critical Spare Parts Section -->
+                <div class="panel-header" style="margin-top: 40px; margin-bottom: 20px; border-top: 1px solid var(--border-color); padding-top: 30px;">
+                    <div>
+                        <h3 class="panel-title">Repuestos Críticos Adicionales / Stock de Bodega</h3>
+                        <p class="panel-subtitle">Registre y controle repuestos especiales, stock crítico de bodegas o repuestos específicos de equipos.</p>
+                    </div>
+                </div>
+
+                <div class="work-orders-grid" style="grid-template-columns: 1fr 1.5fr; gap: 24px; margin-top: 16px;">
+                    <!-- Add Custom Spare Part Form -->
+                    <div class="dashboard-panel" style="padding: 20px;">
+                        <h4 style="margin-bottom: 16px; color: var(--accent-blue-glow);"><i class="fa fa-plus-circle"></i> Agregar Repuesto Crítico</h4>
+                        <form id="form-add-custom-repuesto" onsubmit="event.preventDefault(); saveCustomRepuesto();">
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label class="form-label" for="rep-custom-nombre">Nombre del Repuesto *</label>
+                                <input type="text" id="rep-custom-nombre" class="form-input-text" placeholder="Ej: Correa Optibelt SPZ 1000" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label class="form-label" for="rep-custom-eq">Asociar a Equipo (Opcional)</label>
+                                <select id="rep-custom-eq" class="form-select">
+                                    <!-- Populated dynamically by JS -->
+                                </select>
+                            </div>
+                            <div class="form-grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="rep-custom-cant">Cantidad *</label>
+                                    <input type="number" id="rep-custom-cant" class="form-input-text" min="1" value="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="rep-custom-estado">Estado *</label>
+                                    <select id="rep-custom-estado" class="form-select" required>
+                                        <option value="En Stock">En Stock</option>
+                                        <option value="En Tránsito">En Tránsito</option>
+                                        <option value="Pendiente">Pendiente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; background-color: var(--accent-blue);">
+                                <i class="fa fa-save"></i> Guardar Repuesto
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Custom Spare Parts List Table -->
+                    <div class="dashboard-panel" style="padding: 20px; overflow-x: auto;">
+                        <h4 style="margin-bottom: 16px; color: var(--accent-teal-glow);"><i class="fa fa-boxes-stacked"></i> Repuestos Registrados</h4>
+                        <table class="custom-table" style="font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th>Repuesto</th>
+                                    <th>Equipo</th>
+                                    <th style="text-align: center;">Cant.</th>
+                                    <th style="text-align: center;">Estado</th>
+                                    <th style="text-align: center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="custom-repuestos-table-body">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 5. HISTORICAL SERVICE LOG VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-historial" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px;">
+                    <div>
+                        <h2 class="panel-title">Bitácora de Servicios e Intervenciones</h2>
+                        <p class="panel-subtitle">Historial cronológico completo de mantenciones correctivas,
+                            preventivas e instalaciones.</p>
+                    </div>
+                </div>
+
+                <!-- Historial Type Filter & Search Bar -->
+                <div style="background-color: var(--bg-card); padding: 16px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Row 1: Type, Search and Print button -->
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500; white-space: nowrap;"><i class="fa fa-filter"></i> Mostrar:</span>
+                            <select id="select-history-type" class="form-select" style="max-width: 280px; background-color: rgba(255,255,255,0.01); border-color: var(--border-color); font-size: 13px; height: 38px;">
+                                <option value="todos">Todos los Trabajos</option>
+                                <option value="activo">Bitácora Contrato MTI (2026-2027)</option>
+                                <option value="extraordinario">Trabajos Extraordinarios MTI</option>
+                                <option value="auditoria">Antecedentes Planta (Pre-2026)</option>
+                            </select>
+                        </div>
+
+                        <div class="search-wrapper" style="flex: 1; max-width: 400px; min-width: 250px; height: 38px;">
+                            <i class="fa fa-search"></i>
+                            <input type="text" id="history-search" class="search-input" placeholder="Buscar por equipo, técnico, descripción..." style="padding-left: 36px;">
+                        </div>
+
+                        <button type="button" class="btn-primary" onclick="printUnifiedHistoryReport()" style="background-color: var(--accent-blue); display: inline-flex; align-items: center; gap: 8px; margin-left: auto; height: 38px; font-size: 13px; padding: 0 16px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; color: #fff;">
+                            <i class="fa fa-print"></i> Generar Hoja de Historial
+                        </button>
+                    </div>
+
+                    <!-- Row 2: Advanced filters (Year, Month, Period/Week, Alphabet/A-Z) -->
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
+                        <span style="font-size: 12px; color: var(--text-muted); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;"><i class="fa fa-sliders"></i> Filtros:</span>
+                        
+                        <!-- Año -->
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <select id="select-history-year" class="form-select" style="width: 130px; background-color: rgba(255,255,255,0.01); border-color: var(--border-color); font-size: 12px; height: 32px; padding: 0 8px;">
+                                <option value="todos">Todos los Años</option>
+                                <option value="2027">2027</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+
+                        <!-- Mes -->
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <select id="select-history-month" class="form-select" style="width: 145px; background-color: rgba(255,255,255,0.01); border-color: var(--border-color); font-size: 12px; height: 32px; padding: 0 8px;">
+                                <option value="todos">Todos los Meses</option>
+                                <option value="01">Enero</option>
+                                <option value="02">Febrero</option>
+                                <option value="03">Marzo</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Mayo</option>
+                                <option value="06">Junio</option>
+                                <option value="07">Julio</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Septiembre</option>
+                                <option value="10">Octubre</option>
+                                <option value="11">Noviembre</option>
+                                <option value="12">Diciembre</option>
+                            </select>
+                        </div>
+
+                        <!-- Rango / Período (Semana, etc.) -->
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <select id="select-history-period" class="form-select" style="width: 155px; background-color: rgba(255,255,255,0.01); border-color: var(--border-color); font-size: 12px; height: 32px; padding: 0 8px;">
+                                <option value="todos">Cualquier Período</option>
+                                <option value="esta-semana">Esta Semana</option>
+                                <option value="semana-pasada">Semana Pasada</option>
+                                <option value="este-mes">Este Mes</option>
+                                <option value="mes-anterior">Mes Anterior</option>
+                                <option value="ultimos-7-dias">Últimos 7 días</option>
+                                <option value="ultimos-30-dias">Últimos 30 días</option>
+                                <option value="año-actual">Año Actual</option>
+                            </select>
+                        </div>
+
+                        <!-- Abecedario (Inicial del Equipo) -->
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <select id="select-history-alphabet" class="form-select" style="width: 165px; background-color: rgba(255,255,255,0.01); border-color: var(--border-color); font-size: 12px; height: 32px; padding: 0 8px;">
+                                <option value="todos">Cualquier Letra (A-Z)</option>
+                                <option value="A-E">A - E</option>
+                                <option value="F-J">F - J</option>
+                                <option value="K-O">K - O</option>
+                                <option value="P-T">P - T</option>
+                                <option value="U-Z">U - Z</option>
+                            </select>
+                        </div>
+
+                        <!-- Botón para Limpiar Filtros -->
+                        <button type="button" id="btn-clear-history-filters" class="btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--border-color); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-secondary); background: transparent; margin-left: auto;">
+                            <i class="fa fa-rotate-left"></i> Limpiar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <div class="timeline" id="history-timeline">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 6. WORK ORDERS (ÓRDENES DE TRABAJO) VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-work-orders" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px;">
+                    <div>
+                        <h2 class="panel-title">Registro y Control de Órdenes de Trabajo</h2>
+                        <p class="panel-subtitle">Gestione intervenciones correctivas, preventivas y reportes de fallas
+                            no planificadas.</p>
+                    </div>
+                </div>
+
+                <div class="work-orders-grid">
+                    <!-- Form Panel -->
+                    <div class="dashboard-panel" style="padding: 24px;">
+                        <h3 style="margin-bottom: 16px;"><i class="fa-solid fa-file-pen"
+                                style="color: var(--accent-blue-glow); margin-right: 8px;"></i>Nueva Orden de Trabajo
+                        </h3>
+                        <form id="form-work-order" onsubmit="event.preventDefault(); submitWorkOrder();">
+                            <div class="form-group" style="position: relative; margin-bottom: 16px;">
+                                <label class="form-label" for="wo-eq-search">Buscar Equipo (Escribe ID o Nombre)
+                                    *</label>
+                                <div class="search-wrapper" style="width: 100%;">
+                                    <i class="fa fa-search"></i>
+                                    <input type="text" id="wo-eq-search" class="search-input" style="width: 100%;"
+                                        placeholder="Ej: smolt 1, M-01..." required autocomplete="off">
+                                </div>
+                                <ul id="wo-autocomplete-list" class="autocomplete-list" style="display: none;"></ul>
+                                <input type="hidden" id="wo-eq-id" required>
+                            </div>
+
+                            <div class="form-grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="wo-tipo-trabajo">Tipo de Trabajo *</label>
+                                    <select id="wo-tipo-trabajo" class="form-select" required>
+                                        <option value="Correctivo">Correctivo (Falla)</option>
+                                        <option value="Preventivo">Preventivo Programado</option>
+                                        <option value="Calibración">Calibración / Ajuste</option>
+                                        <option value="Instalación">Instalación / Upgrade</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="wo-tipo-falla-group">
+                                    <label class="form-label" for="wo-tipo-falla">Tipo de Falla</label>
+                                    <select id="wo-tipo-falla" class="form-select">
+                                        <option value="">-- Seleccionar --</option>
+                                        <option value="Mecánica">Mecánica</option>
+                                        <option value="Eléctrica">Eléctrica</option>
+                                        <option value="Instrumentación">Instrumentación</option>
+                                        <option value="Neumática">Neumática</option>
+                                        <option value="Operacional">Operacional</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="wo-fecha">Fecha de Intervención *</label>
+                                    <input type="date" id="wo-fecha" class="form-input-text" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="wo-tecnico">Técnico Responsable *</label>
+                                    <input type="text" id="wo-tecnico" class="form-input-text"
+                                        placeholder="Ej: Pedro González - MTI" required>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="wo-reparacion-horas">Tiempo de Reparación (Horas)
+                                        *</label>
+                                    <input type="number" id="wo-reparacion-horas" class="form-input-text" min="0"
+                                        step="0.5" value="1" placeholder="Ej: 2" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="wo-puesta-marcha">Puesta en Marcha / Estado *</label>
+                                    <select id="wo-puesta-marcha" class="form-select" required>
+                                        <option value="Operativo">Exitosa / Equipo Operativo</option>
+                                        <option value="Requiere Revisión">En Observación / Requiere Revisión</option>
+                                        <option value="Crítico">Fuera de Servicio / Pendiente</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label class="form-label" for="wo-rodamientos">Rodamientos Cambiados (separados por
+                                    comas)</label>
+                                <input type="text" id="wo-rodamientos" class="form-input-text"
+                                    placeholder="Ej: 6205, 6206">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label class="form-label" for="wo-acciones">Acción de Mantenimiento / Detalles *</label>
+                                <textarea id="wo-acciones" class="form-input-text" rows="3"
+                                    placeholder="Ej: Cambio de rodamientos de motor de ventilación, limpieza y lubricación."
+                                    required style="resize: vertical;"></textarea>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label class="form-label" for="wo-comentarios">Comentarios / Observaciones
+                                    Adicionales</label>
+                                <textarea id="wo-comentarios" class="form-input-text" rows="2"
+                                    placeholder="Notas adicionales sobre la intervención..."
+                                    style="resize: vertical;"></textarea>
+                            </div>
+
+                            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                <button type="reset" class="btn-secondary" id="btn-reset-wo">Limpiar</button>
+                                <button type="submit" class="btn-primary" style="background-color: var(--accent-blue);">
+                                    <i class="fa fa-save"></i> Registrar Orden
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Recent Orders Panel -->
+                    <div class="dashboard-panel" style="padding: 24px; display: flex; flex-direction: column;">
+                        <h3 style="margin-bottom: 16px;"><i class="fa-solid fa-clock-rotate-left"
+                                style="color: var(--accent-teal-glow); margin-right: 8px;"></i>Órdenes Registradas
+                            Recientes</h3>
+                        <div class="wo-list" id="wo-recent-list"
+                            style="flex-grow: 1; overflow-y: auto; max-height: 580px;">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 7. DATABASE MANAGEMENT (BASE DE DATOS) VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-database" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px;">
+                    <div>
+                        <h2 class="panel-title">Gestión y Resguardo de Base de Datos</h2>
+                        <p class="panel-subtitle">Administre la integridad física de los datos del CMMS, exporte
+                            reportes en Excel o realice copias de seguridad completas.</p>
+                    </div>
+                </div>
+
+                <div class="work-orders-grid" style="grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <!-- Left: JSON Backup -->
+                    <div class="dashboard-panel" style="padding: 24px;">
+                        <h3
+                            style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--accent-teal-glow);">
+                            <i class="fa-solid fa-file-code"></i> Respaldar Base de Datos (JSON)
+                        </h3>
+                        <p class="panel-subtitle" style="margin-bottom: 20px; font-size: 13px; line-height: 1.5;">
+                            Este archivo JSON representa **la base de datos unificada** del CMMS de MTI Servicios
+                            Industriales. Contiene de forma detallada y modularizada:
+                        </p>
+                        <ul
+                            style="color: var(--text-secondary); font-size: 12.5px; line-height: 1.6; margin-left: 20px; margin-bottom: 24px; list-style-type: disc;">
+                            <li>La totalidad del catálogo de equipos de todos los centros con sus características
+                                eléctricas y mecánicas completas.</li>
+                            <li>La bitácora oficial del contrato activo (Historial MTI 2026-2027) con todas las órdenes
+                                ejecutadas.</li>
+                            <li>Los antecedentes de auditorías y levantamientos técnicos de planta previos al contrato
+                                (Pre-2026).</li>
+                            <li>Los estados de completado del planificador preventivo de 1 año.</li>
+                            <li>La estructura de jerarquías de Clientes y Centros de cultivo.</li>
+                        </ul>
+
+                        <blockquote
+                            style="background: rgba(255,255,255,0.02); border-left: 3px solid var(--accent-teal); padding: 10px 14px; border-radius: 4px; font-size: 12px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.4;">
+                            <strong>Importante:</strong> Al descargar este archivo, puedes llevarlo a cualquier otra
+                            computadora e importarlo. La aplicación se sincronizará al 100% de inmediato con todo tu
+                            historial de eventos y fichas técnicas intactas.
+                        </blockquote>
+
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn-primary" onclick="exportDatabaseJSON()"
+                                style="background-color: var(--accent-teal); flex: 1; padding: 12px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer; color: #fff; font-weight: 600; justify-content: center; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-file-arrow-down"></i> Exportar JSON Completo
+                            </button>
+                            <button class="btn-secondary"
+                                onclick="document.getElementById('import-json-file-tab').click()"
+                                style="flex: 1; padding: 12px; font-size: 13px; border-radius: 6px; background-color: rgba(255,255,255,0.02); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-secondary); font-weight: 500; justify-content: center; display: flex; align-items: center; gap: 6px;">
+                                <i class="fa-solid fa-file-arrow-up"></i> Importar JSON
+                            </button>
+                            <input type="file" id="import-json-file-tab" style="display: none;" accept=".json"
+                                onchange="importDatabaseJSON(event)">
+                        </div>
+                    </div>
+
+                    <!-- Right: Excel Export & Stats -->
+                    <div class="dashboard-panel" style="padding: 24px; display: flex; flex-direction: column;">
+                        <h3
+                            style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: var(--status-operativo);">
+                            <i class="fa-solid fa-file-excel"></i> Exportación de Planilla Excel (CSV)
+                        </h3>
+                        <p class="panel-subtitle" style="margin-bottom: 20px; font-size: 13px; line-height: 1.5;">
+                            Descarga una planilla de cálculo Excel que contiene únicamente los equipos y fichas técnicas
+                            del centro activo seleccionado actualmente en el menú lateral.
+                        </p>
+
+                        <div
+                            style="background-color: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: auto;">
+                            <h4
+                                style="font-size: 13px; color: var(--text-primary); margin-bottom: 12px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">
+                                Estadísticas del Centro Activo</h4>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 12.5px;">
+                                <div
+                                    style="background: rgba(255,255,255,0.02); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                    <div style="color: var(--text-muted); font-size: 11px;">Equipos en Centro</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: var(--accent-blue-glow); margin-top: 4px;"
+                                        id="db-stat-equipos">0</div>
+                                </div>
+                                <div
+                                    style="background: rgba(255,255,255,0.02); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                    <div style="color: var(--text-muted); font-size: 11px;">Tamaño Estimado DB</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: var(--accent-teal-glow); margin-top: 4px;"
+                                        id="db-stat-size">0 KB</div>
+                                </div>
+                                <div
+                                    style="background: rgba(255,255,255,0.02); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                    <div style="color: var(--text-muted); font-size: 11px;">Órdenes de Trabajo MTI</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: var(--status-advertencia); margin-top: 4px;"
+                                        id="db-stat-eventos">0</div>
+                                </div>
+                                <div
+                                    style="background: rgba(255,255,255,0.02); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                    <div style="color: var(--text-muted); font-size: 11px;">Tareas Planificadas Listas
+                                    </div>
+                                    <div style="font-size: 18px; font-weight: 700; color: var(--status-operativo); margin-top: 4px;"
+                                        id="db-stat-completadas">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 24px;">
+                            <button class="btn-secondary" onclick="exportEquipmentExcel()"
+                                style="width: 100%; padding: 12px; font-size: 13px; border-radius: 6px; background-color: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); cursor: pointer; color: var(--status-operativo); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fa-solid fa-file-excel" style="font-size: 14px;"></i> Descargar Planilla Excel
+                                de Cultivo (CSV)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================== -->
+            <!-- 8. PROYECTOS VIVOS (MESA DE TRABAJO & BITÁCORA) VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-trabajo-actual" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h2 class="panel-title"><i class="fa-solid fa-diagram-project" style="color: var(--accent-blue-glow); margin-right: 8px;"></i>Proyectos Vivos & Bitácora de Eventos</h2>
+                        <p class="panel-subtitle">Trazabilidad en tiempo real (Mesa Abierta), control de hitos, consumo de repuestos e informes técnicos editables con respaldo en Google Drive.</p>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn-primary" onclick="openModalNuevoProyecto()" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 600;">
+                            <i class="fa-solid fa-plus-circle"></i> Abrir Nuevo Proyecto (Mesa)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PROJECT FILTERS AND TABS -->
+                <div style="display: flex; gap: 16px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                    <button id="btn-proyectos-activos" class="btn-secondary active" onclick="filtrarEstadoProyecto('ABIERTO')" style="border-radius: 20px;">
+                        <i class="fa-solid fa-spinner fa-spin-pulse" style="color: #10b981;"></i> En Curso (Mesa Abierta) (<span id="cant-proyectos-activos">0</span>)
+                    </button>
+                    <button id="btn-proyectos-cerrados" class="btn-secondary" onclick="filtrarEstadoProyecto('CERRADO')" style="border-radius: 20px;">
+                        <i class="fa-solid fa-box-archive" style="color: var(--text-muted);"></i> Concluidos (Cerrados) (<span id="cant-proyectos-cerrados">0</span>)
+                    </button>
+                </div>
+
+                <!-- MAIN PROJECTS GRID -->
+                <div id="grid-proyectos-vivos" class="equipment-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
+                    <!-- Rendered dynamically by JS -->
+                </div>
+            </section>
+
+            <!-- MODAL 1: NUEVO PROYECTO / MESA ABIERTA -->
+            <div id="modal-nuevo-proyecto" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+                <div class="dashboard-panel" style="width: 100%; max-width: 600px; padding: 24px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-folder-plus" style="color: #10b981;"></i> Abrir Nuevo Proyecto / Mesa de Trabajo
+                        </h3>
+                        <button onclick="closeModalNuevoProyecto()" class="btn-secondary" style="padding: 4px 10px;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <form id="form-nuevo-proyecto" onsubmit="event.preventDefault(); guardarNuevoProyecto();">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label class="form-label" for="np-titulo">Título del Proyecto / Servicio *</label>
+                            <input type="text" id="np-titulo" class="form-input-text" placeholder="Ej: Overhaul Completo y Balanceo Bomba Smolt 1" required>
+                        </div>
+                        <div class="form-grid-2" style="margin-bottom: 16px;">
+                            <div class="form-group">
+                                <label class="form-label" for="np-equipo">Equipo Asociado *</label>
+                                <select id="np-equipo" class="form-select" required>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="np-tecnico">Técnico Líder / Responsable *</label>
+                                <input type="text" id="np-tecnico" class="form-input-text" placeholder="Ej: Juan Pérez / MTI" required>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label class="form-label" for="np-diagnostico">Diagnóstico Inicial / Motivo de Apertura</label>
+                            <textarea id="np-diagnostico" class="form-input-text" rows="3" placeholder="Describa la falla reportada o el objetivo del servicio..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button type="button" onclick="closeModalNuevoProyecto()" class="btn-secondary">Cancelar</button>
+                            <button type="submit" class="btn-primary" style="background: #10b981;">
+                                <i class="fa-solid fa-folder-open"></i> Abrir Proyecto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MODAL 2: DETALLE DE PROYECTO & BITÁCORA TIMELINE -->
+            <div id="modal-detalle-proyecto" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; backdrop-filter: blur(6px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
+                <div class="dashboard-panel" style="width: 100%; max-width: 900px; padding: 28px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color); max-height: 90vh; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px;">
+                        <div>
+                            <span id="dp-badge-estado" class="badge" style="background: #10b981; color: white; margin-bottom: 6px; display: inline-block;">EN CURSO</span>
+                            <h2 id="dp-titulo" style="margin: 4px 0;">Cargando título...</h2>
+                            <p id="dp-subtitulo" style="margin: 0; color: var(--text-muted); font-size: 13px;">Equipo: - | Centro: - | Técnico: -</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="btn-cerrar-proyecto-dossier" onclick="abrirEditorDossier()" class="btn-primary" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                                <i class="fa-solid fa-file-signature"></i> Cierre & Dossier Técnico
+                            </button>
+                            <button onclick="closeModalDetalleProyecto()" class="btn-secondary" style="padding: 6px 12px;"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex-grow: 1; overflow-y: auto; padding-right: 4px;">
+                        <!-- LEFT COLUMN: BITÁCORA TIMELINE -->
+                        <div>
+                            <h3 style="margin-bottom: 12px; font-size: 15px;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-blue-glow); margin-right: 6px;"></i>Línea de Tiempo (Bitácora)</h3>
+                            <div id="dp-timeline" style="display: flex; flex-direction: column; gap: 14px; position: relative; padding-left: 20px; border-left: 2px dashed var(--border-color);">
+                                <!-- Timeline events populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: NUEVO HITO & MATERIALES -->
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Formulario Nuevo Hito -->
+                            <div style="background: var(--bg-hover); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 14px;"><i class="fa-solid fa-plus" style="color: #10b981; margin-right: 6px;"></i>Agregar Registro a Bitácora</h4>
+                                <form id="form-nuevo-hito" onsubmit="event.preventDefault(); guardarHitoBitacora();">
+                                    <div class="form-grid-2" style="margin-bottom: 10px;">
+                                        <div>
+                                            <label class="form-label" style="font-size: 11px;">Tipo de Acción</label>
+                                            <select id="nh-tipo" class="form-select" style="padding: 6px;">
+                                                <option value="Inspección">Inspección / Diagnóstico</option>
+                                                <option value="Desarme">Desarme / Retiro</option>
+                                                <option value="Repuesto">Reemplazo de Repuesto</option>
+                                                <option value="Prueba">Pruebas Eléctricas/Mecánicas</option>
+                                                <option value="Armado">Montaje / Armado</option>
+                                                <option value="Pintura">Pintura / Limpieza</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="form-label" style="font-size: 11px;">Técnico</label>
+                                            <input type="text" id="nh-tecnico" class="form-input-text" style="padding: 6px;" placeholder="Técnico MTI" required>
+                                        </div>
+                                    </div>
+                                    <div style="margin-bottom: 10px;">
+                                        <label class="form-label" style="font-size: 11px;">Detalle de la Acción</label>
+                                        <textarea id="nh-descripcion" class="form-input-text" rows="2" style="padding: 6px; font-size: 12px;" placeholder="Detalle exactamente la acción realizada..." required></textarea>
+                                    </div>
+                                    <!-- Photo Input -->
+                                    <div style="margin-bottom: 12px;">
+                                        <label class="form-label" style="font-size: 11px;"><i class="fa-solid fa-camera"></i> Evidencia Fotográfica (Sincroniza a Google Drive)</label>
+                                        <input type="file" id="nh-foto-input" accept="image/*" class="form-input-text" style="padding: 4px; font-size: 12px;">
+                                    </div>
+                                    <button type="submit" class="btn-primary" style="width: 100%; background: #10b981; font-size: 13px; padding: 8px;">
+                                        <i class="fa-solid fa-paper-plane"></i> Registrar Hito
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Materiales / Repuestos Consumidos -->
+                            <div style="background: var(--bg-hover); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);">
+                                <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 14px;"><i class="fa-solid fa-gears" style="color: var(--accent-teal-glow); margin-right: 6px;"></i>Repuestos & Insumos Utilizados</h4>
+                                <div id="dp-lista-repuestos" style="display: flex; flex-direction: column; gap: 6px; font-size: 12px; max-height: 140px; overflow-y: auto;">
+                                    <!-- Material list by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL 3: EDITOR INTERACTIVO DE DOSSIER TÉCNICO PRE-EXPORTACIÓN -->
+            <div id="modal-editor-dossier" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1001; backdrop-filter: blur(8px); align-items: center; justify-content: center; overflow-y: auto; padding: 20px;">
+                <div class="dashboard-panel" style="width: 100%; max-width: 850px; background: #ffffff; color: #1e293b; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); padding: 36px; max-height: 90vh; overflow-y: auto; font-family: system-ui, -apple-system, sans-serif;">
+                    
+                    <!-- DOSSIER HEADER -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px;">
+                        <div>
+                            <h1 style="margin: 0; color: #0f172a; font-size: 22px; font-weight: 800; text-transform: uppercase;">MTI Servicios Industriales</h1>
+                            <p style="margin: 2px 0 0 0; color: #475569; font-size: 13px; font-weight: 600;">Informe Técnico Final de Proyecto & Dossier de Entrega</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <span id="ed-codigo-dossier" style="background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 12px; color: #0f172a;">PRY-2026-000</span>
+                            <p id="ed-fecha-emision" style="margin: 4px 0 0 0; font-size: 11px; color: #64748b;">Fecha: 21/07/2026</p>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px 16px; margin-bottom: 20px; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div><strong>Cliente:</strong> <span id="ed-cliente">Cermaq</span></div>
+                        <div><strong>Centro de Cultivo:</strong> <span id="ed-centro">Sta Juana</span></div>
+                        <div><strong>Equipo:</strong> <span id="ed-equipo">Bomba Smolt 1</span></div>
+                        <div><strong>Técnico Responsable:</strong> <span id="ed-tecnico">Juan Pérez</span></div>
+                    </div>
+
+                    <!-- EDITABLE SUMMARY & CONCLUSIONS -->
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 700; font-size: 13px; color: #0f172a; display: block; margin-bottom: 6px;">
+                            <i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i> Título del Proyecto (Editable):
+                        </label>
+                        <input type="text" id="ed-input-titulo" class="form-input-text" style="background: #f1f5f9; color: #0f172a; font-weight: 700; border: 1px solid #94a3b8; padding: 8px; width: 100%; font-size: 14px;" value="Overhaul y Mantenimiento Electromecánico">
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 700; font-size: 13px; color: #0f172a; display: block; margin-bottom: 6px;">
+                            <i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i> Resumen de Trabajos y Conclusiones Técnicas (Editable):
+                        </label>
+                        <textarea id="ed-input-conclusiones" rows="4" class="form-input-text" style="background: #f1f5f9; color: #0f172a; border: 1px solid #94a3b8; padding: 10px; width: 100%; font-size: 13px; line-height: 1.5;" placeholder="Ingrese el resumen técnico final para el informe del cliente..."></textarea>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 700; font-size: 13px; color: #0f172a; display: block; margin-bottom: 6px;">
+                            <i class="fa-solid fa-pen-to-square" style="color: #2563eb;"></i> Recomendaciones de Operación Futura (Editable):
+                        </label>
+                        <textarea id="ed-input-recomendaciones" rows="2" class="form-input-text" style="background: #f1f5f9; color: #0f172a; border: 1px solid #94a3b8; padding: 10px; width: 100%; font-size: 13px;" placeholder="Ej: Realizar re-lubricación de rodamientos en 3 meses..."></textarea>
+                    </div>
+
+                    <!-- BITÁCORA SUMMARY TABLE -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #0f172a; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;">Resumen Cronológico de Acciones (Bitácora)</h4>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+                            <thead>
+                                <tr style="background: #f1f5f9; color: #334155;">
+                                    <th style="padding: 6px 10px; border: 1px solid #cbd5e1;">Fecha / Hora</th>
+                                    <th style="padding: 6px 10px; border: 1px solid #cbd5e1;">Tipo</th>
+                                    <th style="padding: 6px 10px; border: 1px solid #cbd5e1;">Técnico</th>
+                                    <th style="padding: 6px 10px; border: 1px solid #cbd5e1;">Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ed-tabla-bitacora">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- SECCIÓN FIRMAS -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; padding-top: 20px; border-top: 1px solid #cbd5e1; text-align: center; font-size: 12px;">
+                        <div>
+                            <div style="border-bottom: 1px solid #0f172a; height: 40px; margin-bottom: 6px;"></div>
+                            <strong>Técnico Responsable MTI</strong>
+                            <p style="margin: 2px 0 0 0; color: #64748b;" id="ed-firma-tecnico">Nombre y Firma</p>
+                        </div>
+                        <div>
+                            <div style="border-bottom: 1px solid #0f172a; height: 40px; margin-bottom: 6px;"></div>
+                            <strong>V°B° Cliente / Recepción</strong>
+                            <p style="margin: 2px 0 0 0; color: #64748b;">Firma y Timbre Centro</p>
+                        </div>
+                    </div>
+
+                    <!-- ACTION BUTTONS -->
+                    <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 30px; border-top: 2px solid #0f172a; padding-top: 20px;" class="no-print">
+                        <button onclick="closeModalEditorDossier()" class="btn-secondary" style="background: #e2e8f0; color: #0f172a; font-weight: 600;">Cancelar</button>
+                        <button onclick="window.print()" class="btn-secondary" style="background: #475569; color: white; font-weight: 600;">
+                            <i class="fa-solid fa-print"></i> Imprimir Informe
+                        </button>
+                        <button onclick="confirmarYCerrarProyectoConDrive()" class="btn-primary" style="background: #2563eb; font-weight: 700; padding: 10px 20px;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Confirmar, Cerrar y Subir PDF a Drive
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- 9. INFORMACIÓN GENERAL & MANUALES VIEW -->
+            <!-- ============================================== -->
+            <section id="panel-info-general" class="tab-panel">
+                <div class="panel-header" style="margin-bottom: 24px;">
+                    <div>
+                        <h2 class="panel-title">Información General & Biblia de Mantenimiento</h2>
+                        <p class="panel-subtitle">Manuales técnicos de terreno, pautas de inspección del fabricante y guías de referencia rápida.</p>
+                    </div>
+                </div>
+
+                <div class="work-orders-grid" style="grid-template-columns: 300px 1fr; gap: 24px; margin-top: 16px;">
+                    <!-- Left Column: Manuals Index -->
+                    <div class="dashboard-panel" style="padding: 20px; display: flex; flex-direction: column; gap: 12px; height: 700px; overflow-y: auto;">
+                        <h3 style="font-size: 14px; font-weight: 700; margin: 0 0 8px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; color: var(--accent-blue-glow); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-book-open"></i> Pautas de Inspección
+                        </h3>
+                        <ul class="months-list" id="info-manuals-list" style="display: flex; flex-direction: column; gap: 6px; padding: 0; margin: 0; list-style-type: none; overflow-y: auto; flex-grow: 1;">
+                            <!-- Dynamically populated by JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Right Column: Manual Detail View -->
+                    <div class="dashboard-panel" style="padding: 24px; height: 700px; overflow-y: auto; display: flex; flex-direction: column;" id="info-manual-detail">
+                        <!-- Loaded dynamically by JS -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- EQUIPMENT DETAIL MODAL -->
+    <!-- ====================    <!-- ============================================== -->
+    <!-- EQUIPMENT DETAIL MODAL (MTI CUSTOM CMMS) -->
+    <!-- ============================================== -->
+    <div class="modal-overlay" id="eq-modal-overlay">
+        <div class="modal-container" style="max-width: 1000px; width: 95%;">
+            <div class="modal-header">
+                <div class="modal-title-wrapper">
+                    <h2 class="modal-title" id="modal-eq-title">Nombre del Equipo</h2>
+                    <span class="modal-subtitle" id="modal-eq-id">INV_001</span>
+                </div>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+
+            <div class="modal-body" style="padding: 20px;">
+                <div style="display: grid; grid-template-columns: 300px 1fr; gap: 24px;">
+                    <!-- LEFT COLUMN: Image and QR Code -->
+                    <div class="modal-media" style="border-right: 1px solid var(--border-color); padding-right: 24px;">
+                        <div class="modal-img-wrapper" id="modal-eq-image-wrapper"
+                            style="height: 180px; position: relative;">
+                            <!-- Loaded dynamically -->
+                        </div>
+
+                        <!-- Thumbnail gallery list for multiple photos -->
+                        <div id="modal-thumbnails-wrapper"
+                            style="display: flex; gap: 8px; overflow-x: auto; margin-top: 10px; padding: 4px 0; border-bottom: 1px solid var(--border-color); min-height: 48px;">
+                            <!-- Thumbnails dynamically rendered -->
+                        </div>
+
+                        <!-- Image uploader -->
+                        <div class="image-upload-wrapper" style="margin-top: 15px;">
+                            <label class="form-label">Subir Imágenes (Múltiples)</label>
+                            <input type="file" id="modal-upload-image" class="file-input-hidden" accept="image/*"
+                                multiple>
+                            <button type="button" class="btn-upload-trigger"
+                                onclick="document.getElementById('modal-upload-image').click()"
+                                style="width: 100%; margin-bottom: 8px;">
+                                <i class="fa fa-upload"></i> Subir Nueva Foto
+                            </button>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="text" id="modal-edit-image-url" class="form-input-text"
+                                    placeholder="URL de imagen..."
+                                    style="font-size: 11px; padding: 6px; margin: 0; flex: 1;">
+                                <button type="button" class="btn-secondary" onclick="addUrlPhoto()"
+                                    style="padding: 6px 10px; font-size: 11px; margin: 0; background-color: rgba(255,255,255,0.02); border-color: var(--border-color); color: var(--text-primary); cursor: pointer;">Añadir</button>
+                            </div>
+                        </div>
+
+
+                        <!-- QR Code Box -->
+                        <div class="qr-code-box">
+                            <label class="form-label" style="margin-bottom: 8px;">Código QR de Terreno</label>
+                            <div id="modal-qr-container">
+                                <!-- QR Image rendered here -->
+                            </div>
+                            <span class="qr-code-label" id="modal-qr-url-label">ID del Equipo</span>
+                            <button type="button" class="btn-qr-action" id="btn-print-qr">
+                                <i class="fa fa-print"></i> Imprimir QR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: Tabbed specs & history -->
+                    <div style="display: flex; flex-direction: column; min-height: 480px;">
+                        <!-- Tab Buttons -->
+                        <div class="modal-tabs" id="modal-tab-headers">
+                            <button type="button" class="modal-tab-btn active" data-modaltab="tab-gen">Datos
+                                Generales</button>
+                            <button type="button" class="modal-tab-btn" data-modaltab="tab-elec">Especificaciones
+                                Eléctricas</button>
+                            <button type="button" class="modal-tab-btn" data-modaltab="tab-meca">Mecánicas y
+                                Repuestos</button>
+                            <button type="button" class="modal-tab-btn" data-modaltab="tab-plan">Plan y
+                                Bitácora</button>
+                            <button type="button" class="modal-tab-btn" data-modaltab="tab-pauta">Pauta Técnica MTI</button>
+                        </div>
+
+                        <!-- Tab 1: General Specs -->
+                        <div class="modal-tab-content active" id="tab-gen">
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-id">ID de Equipo (Dejar vacío para
+                                        autogenerar)</label>
+                                    <input type="text" id="modal-edit-id" class="form-input-text"
+                                        placeholder="Ej: M-01">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-nombre">Nombre de Equipo *</label>
+                                    <input type="text" id="modal-edit-nombre" class="form-input-text" required
+                                        placeholder="Ej: Motor de Aspiración Hatchery">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-area">Área Planta</label>
+                                    <select id="modal-edit-area" class="form-select">
+                                        <option value="Hatchery">Hatchery</option>
+                                        <option value="Fry">Fry</option>
+                                        <option value="Smolt">Smolt</option>
+                                        <option value="Exteriores">Exteriores</option>
+                                        <option value="Iluminación">Iluminación</option>
+                                        <option value="Alimentación">Alimentación</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-designacion">Designación</label>
+                                    <input type="text" id="modal-edit-designacion" class="form-input-text"
+                                        placeholder="Ej: Focos Estanques, Bombas Grundfos">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-cantidad">Cantidad (Equipos
+                                        Similares)</label>
+                                    <input type="number" id="modal-edit-cantidad" class="form-input-text" min="1"
+                                        value="1">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-horas">Horas de Operación Diarias</label>
+                                    <input type="number" id="modal-edit-horas" class="form-input-text" min="0" max="24"
+                                        value="8">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-estado">Estado de Operatividad</label>
+                                    <select id="modal-edit-estado" class="form-select">
+                                        <option value="Operativo">Operativo</option>
+                                        <option value="Requiere Revisión">Requiere Revisión</option>
+                                        <option value="Crítico">Crítico (Fuera de Servicio)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-frecuencia">Frecuencia Preventiva
+                                        (Meses)</label>
+                                    <input type="number" id="modal-edit-frecuencia" class="form-input-text" min="1"
+                                        max="12" value="6">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-cliente">Empresa / Cliente *</label>
+                                    <select id="modal-edit-cliente" class="form-select" required>
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-centro">Centro de Cultivo *</label>
+                                    <select id="modal-edit-centro" class="form-select" required>
+                                        <!-- Populated dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- Tab 2: Electrical Specs -->
+                        <div class="modal-tab-content" id="tab-elec">
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-marca">Marca del Motor / Equipo</label>
+                                    <input type="text" id="modal-edit-marca" class="form-input-text"
+                                        placeholder="Ej: WEG, Siemens, ABB">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-modelo">Modelo</label>
+                                    <input type="text" id="modal-edit-modelo" class="form-input-text"
+                                        placeholder="Ej: W22 Premium">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-serie">N° Serie</label>
+                                    <input type="text" id="modal-edit-serie" class="form-input-text"
+                                        placeholder="Ej: 10243579">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-potencia">Potencia (kW / HP)</label>
+                                    <input type="text" id="modal-edit-potencia" class="form-input-text"
+                                        placeholder="Ej: 5.5 kW / 7.5 HP">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-voltaje">Voltaje (V)</label>
+                                    <input type="text" id="modal-edit-voltaje" class="form-input-text"
+                                        placeholder="Ej: 380 V">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-amperaje">Corriente Nominal (A)</label>
+                                    <input type="text" id="modal-edit-amperaje" class="form-input-text"
+                                        placeholder="Ej: 11.2 A">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-conexion">Tipo de Conexión</label>
+                                    <select id="modal-edit-conexion" class="form-select">
+                                        <option value="Estrella (Y)">Estrella (Y)</option>
+                                        <option value="Triángulo (Δ)">Triángulo (Δ)</option>
+                                        <option value="Estrella/Triángulo (Y/Δ)">Estrella/Triángulo (Y/Δ)</option>
+                                        <option value="Monofásico">Monofásico</option>
+                                        <option value="DC Directa">DC Directa</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-cosfi">Coseno de Fi (cos φ)</label>
+                                    <input type="text" id="modal-edit-cosfi" class="form-input-text"
+                                        placeholder="Ej: 0.84">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-cable">Calibre Cable AWG</label>
+                                    <input type="text" id="modal-edit-cable" class="form-input-text"
+                                        placeholder="Ej: 12 AWG">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-rpm">Velocidad (RPM)</label>
+                                    <input type="text" id="modal-edit-rpm" class="form-input-text"
+                                        placeholder="Ej: 1450 RPM">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Mechanical Specs & Spare Parts -->
+                        <div class="modal-tab-content" id="tab-meca">
+                            <div class="form-group">
+                                <label class="form-label" for="modal-edit-rodamientos">Rodamientos Críticos (separados
+                                    por comas)</label>
+                                <input type="text" id="modal-edit-rodamientos" class="form-input-text"
+                                    placeholder="Ej: 6206, 6205">
+                            </div>
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label class="form-label" for="modal-edit-repuestos">Otros Repuestos Críticos (Correas,
+                                    sellos mecánicos, etc.)</label>
+                                <textarea id="modal-edit-repuestos" class="form-input-text" rows="4"
+                                    placeholder="Ej: Sello mecánico 22mm, Retén de aceite, Acoplamiento flexible N-Eupex"
+                                    style="resize: vertical; min-height: 100px;"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: Plan & History -->
+                        <div class="modal-tab-content" id="tab-plan">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-ultima">Última Mantención</label>
+                                    <input type="date" id="modal-edit-ultima" class="form-input-text">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="modal-edit-proxima">Próxima Mantención</label>
+                                    <input type="date" id="modal-edit-proxima" class="form-input-text">
+                                </div>
+                            </div>
+
+                            <div
+                                style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px;">
+                                <h4
+                                    style="font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary);">
+                                    Programación Preventiva Anual 2026/2027</h4>
+                                <div class="modal-history-list" id="modal-sched-list"
+                                    style="max-height: 100px; overflow-y: auto;">
+                                    <!-- Loaded dynamically by JS -->
+                                </div>
+                            </div>
+
+                            <div
+                                style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px;">
+                                <div
+                                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <h4 style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Historial
+                                        de Intervenciones</h4>
+                                    <button type="button" class="btn-secondary" id="btn-toggle-add-history"
+                                        style="padding: 4px 10px; font-size: 11px;">
+                                        <i class="fa fa-plus"></i> Registrar Mantención
+                                    </button>
+                                </div>
+
+                                <!-- Add history sub-form -->
+                                <div id="modal-add-history-form"
+                                    style="display: none; background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                                    <div class="form-grid-2">
+                                        <div class="form-group">
+                                            <label class="form-label">Fecha de Mantención</label>
+                                            <input type="date" id="history-new-fecha" class="form-input-text">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Tipo de Trabajo</label>
+                                            <select id="history-new-tipo" class="form-select">
+                                                <option value="Preventivo">Preventivo</option>
+                                                <option value="Correctivo">Correctivo</option>
+                                                <option value="Calibración">Calibración</option>
+                                                <option value="Instalación">Instalación / Upgrade</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="margin-top: 8px;">
+                                        <label class="form-label">Rodamientos Cambiados (Opcional)</label>
+                                        <input type="text" id="history-new-rodamientos" class="form-input-text"
+                                            placeholder="Ej: 6206">
+                                    </div>
+                                    <div class="form-group" style="margin-top: 8px;">
+                                        <label class="form-label">Detalles del Trabajo Realizado</label>
+                                        <input type="text" id="history-new-trabajo" class="form-input-text"
+                                            placeholder="Detalle la mantención efectuada...">
+                                    </div>
+                                    <div class="form-group" style="margin-top: 8px;">
+                                        <label class="form-label">Técnico Responsable</label>
+                                        <input type="text" id="history-new-tecnico" class="form-input-text"
+                                            placeholder="Nombre del técnico de MTI...">
+                                    </div>
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px;">
+                                        <button type="button" class="btn-secondary" id="btn-cancel-history"
+                                            style="padding: 6px 12px; font-size: 11px;">Cancelar</button>
+                                        <button type="button" class="btn-primary" id="btn-save-history"
+                                            style="padding: 6px 12px; font-size: 11px; background-color: var(--accent-blue);">Guardar
+                                            Registro</button>
+                                    </div>
+                                </div>
+
+                                <div class="modal-history-list" id="modal-history-list"
+                                    style="max-height: 100px; overflow-y: auto;">
+                                    <!-- Loaded dynamically by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 5: Technical Maintenance Guideline (Pauta MTI) -->
+                        <div class="modal-tab-content" id="tab-pauta" style="max-height: 380px; overflow-y: auto;">
+                            <h3 id="modal-pauta-title" style="margin-bottom: 8px; color: var(--accent-blue-glow); font-size: 15px;">Pauta Técnica de Inspección</h3>
+                            <p class="panel-subtitle" style="margin-bottom: 16px; font-size: 12px; color: var(--text-secondary);">Puntos de chequeo preventivo según especificaciones técnicas MTI.</p>
+                            <ul id="modal-pauta-list" style="padding-left: 20px; color: var(--text-secondary); line-height: 1.6; font-size: 13px;">
+                                <!-- Populated dynamically -->
+                            </ul>
+                        </div>
+
+                        <!-- Modal Actions Bottom -->
+                        <div
+                            style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: auto;">
+                            <button type="button" class="btn-secondary" id="modal-delete-btn"
+                                style="background-color: var(--status-critico-bg); color: var(--status-critico); border-color: rgba(239,68,68,0.2); margin-right: auto; display: none;">
+                                <i class="fa fa-trash"></i> Eliminar Equipo
+                            </button>
+                            <button type="button" class="btn-secondary" id="modal-cancel-btn">Cancelar</button>
+                            <button type="button" class="btn-primary" id="modal-save-btn"
+                                style="background-color: var(--accent-blue);">
+                                <i class="fa fa-save"></i> Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- HIDDEN PRINT QR CARD TEMPLATE -->
+    <!-- ============================================== -->
+    <div id="print-qr-card-container" class="print-qr-card" style="display: none;">
+        <h1
+            style="color: #000000; font-size: 24px; font-weight: 700; margin: 0 0 4px 0; font-family: 'Ubuntu', sans-serif;">
+            MTI Servicios Industriales</h1>
+        <p
+            style="color: #555555; font-size: 14px; margin: 0 0 24px 0; font-family: 'Ubuntu', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500;">
+            Control de Mantenimiento Preventivo</p>
+        <h2 id="print-qr-eq-name"
+            style="font-size: 20px; font-weight: 700; margin: 0 0 4px 0; color: #000000; font-family: 'Ubuntu', sans-serif;">
+            Bomba de Presión 1</h2>
+        <p id="print-qr-eq-id"
+            style="font-family: monospace; font-size: 14px; font-weight: bold; margin: 0 0 20px 0; color: #0066cc;">
+            INV_001</p>
+        <img id="print-qr-image" class="qr-code-image" src="" alt="Código QR"
+            style="width: 200px; height: 200px; margin: 0 auto; display: block; background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+        <p
+            style="font-size: 11px; margin: 24px 0 0 0; color: #777777; font-family: 'Ubuntu', sans-serif; line-height: 1.4;">
+            Escanea este código QR para consultar la Ficha Técnica y registrar intervenciones en terreno directamente en
+            el CMMS.</p>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TERRAIN MOBILE FIELD VIEW -->
+    <!-- ============================================== -->
+    <div id="terrain-field-view" style="display: none; background-color: var(--bg-main); min-height: 100vh;">
+        <div class="terrain-view-container">
+            <header class="terrain-header">
+                <div class="terrain-logo">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>MTI Servicios</span>
+                </div>
+                <span class="terrain-title">Terreno QR</span>
+            </header>
+
+            <div id="terrain-content">
+                <!-- Dynamically loaded field view -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- LIGHTBOX IMAGE VIEWER (MODAL OVERLAY) -->
+    <!-- ============================================== -->
+    <div id="lightbox-modal" class="lightbox-overlay" style="display: none;">
+        <button type="button" class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <button type="button" class="lightbox-prev" onclick="changeLightboxImage(-1)">&lt;</button>
+        <div class="lightbox-content">
+            <img id="lightbox-image" src="" alt="Vista Completa" />
+            <div id="lightbox-caption" class="lightbox-caption">Foto 1 de 1</div>
+        </div>
+        <button type="button" class="lightbox-next" onclick="changeLightboxImage(1)">&gt;</button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- HIDDEN PRINT HISTORY REPORT TEMPLATE -->
+    <!-- ============================================== -->
+    <div id="print-history-report-container" class="print-history-report" style="display: none;">
+        <div class="report-header">
+            <h2>MTI SERVICIOS INDUSTRIALES</h2>
+            <h1>REPORTE DE BITÁCORA & MANTENIMIENTO</h1>
+            <p>Cliente: <strong id="report-client-name">--</strong> | Centro: <strong id="report-center-name">--</strong></p>
+            <p>Fecha de Emisión: <span id="report-emission-date">--</span></p>
+        </div>
+
+        <!-- Summary KPIs -->
+        <div class="report-summary-grid">
+            <div class="report-summary-card">
+                <span class="label">Total Trabajos / OTs</span>
+                <span class="value" id="report-total-jobs">0</span>
+            </div>
+            <div class="report-summary-card">
+                <span class="label">Total Horas</span>
+                <span class="value" id="report-total-hours">0 hrs</span>
+            </div>
+            <div class="report-summary-card">
+                <span class="label">Total Repuestos / Mat.</span>
+                <span class="value" id="report-total-costs">$0</span>
+            </div>
+        </div>
+
+        <!-- Table of entries -->
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 100px;">Fecha</th>
+                    <th style="width: 120px;">Tipo / Origen</th>
+                    <th>Equipo / Ubicación</th>
+                    <th>Descripción / Trabajo Ejecutado</th>
+                    <th style="width: 120px;">Técnico Responsable</th>
+                    <th style="width: 130px;">Insumos / Detalles</th>
+                </tr>
+            </thead>
+            <tbody id="report-table-body">
+                <!-- Populated dynamically by JS -->
+            </tbody>
+        </table>
+        
+        <div class="report-footer">
+            <span>CMMS MTI Servicios Industriales - Cermaq Sta Juana 2026</span>
+            <span>Documento Oficial de Respaldo de Servicio</span>
+        </div>
+    </div>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR (Visible only on mobile screens <= 768px) -->
+    <nav id="mobile-bottom-nav" class="mobile-bottom-bar">
+        <button class="mobile-nav-item active" data-tab="dashboard" onclick="switchMobileTab('dashboard')">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="trabajo-actual" onclick="switchMobileTab('trabajo-actual')">
+            <i class="fa-solid fa-diagram-project"></i>
+            <span>Proyectos</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="inventario" onclick="switchMobileTab('inventario')">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>Equipos</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="planner" onclick="switchMobileTab('planner')">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>Plan 1Año</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="historial" onclick="switchMobileTab('historial')">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Historial</span>
+        </button>
+    </nav>
+
+    <!-- =================================================================== -->
+    <!-- MÓDULOS JAVASCRIPT MODULARIZADOS MTI CMMS -->
+    <!-- =================================================================== -->
+    <!-- 1. Base de datos estática precargada -->
+    <script src="database.js"></script>
+    <!-- 2. Persistencia offline e IndexedDB Manager -->
+    <script src="indexeddb.js"></script>
+    <!-- 3. Control de autenticación y tokens -->
+    <script src="auth.js"></script>
+    <!-- 4. Estado global y configuración -->
+    <script src="js/state.js"></script>
+    <!-- 5. Módulo de catálogo de equipos y especificaciones -->
+    <script src="js/equipos.js"></script>
+    <!-- 6. Módulo de planificación anual licitada -->
+    <script src="js/planner.js"></script>
+    <!-- 7. Módulo de proyectos vivos, bitácora y dossier Google Drive -->
+    <script src="js/proyectos.js"></script>
+    <!-- 8. Módulo de historial y auditoría -->
+    <script src="js/historial.js"></script>
+    <!-- 9. Orquestador principal de la aplicación -->
+    <script src="app.js"></script>
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+                    .catch(err => console.error('Error al registrar Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

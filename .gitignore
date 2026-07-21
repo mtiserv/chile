@@ -1,0 +1,29 @@
+# Archivos pesados y respaldos
+sta_juana_cloudflare.zip
+respaldo1versiondefinitiva/
+
+# Node/npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cloudflare y Wrangler
+.wrangler/
+.dev.vars
+dist/
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos del sistema
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store

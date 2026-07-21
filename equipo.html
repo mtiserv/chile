@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Equipo - MTI CMMS</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data/logo.png">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Ubuntu -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap">
+    
+    <style>
+        :root {
+            --font-primary: 'Ubuntu', sans-serif;
+            --bg-main: #050506;
+            --bg-card: #111113;
+            --bg-card-hover: #161619;
+            --border-color: #242426;
+            --text-primary: #f8f8f8;
+            --text-secondary: #a0a0a5;
+            --text-muted: #5e5e64;
+            --accent-blue: #0284c7;
+            --accent-blue-glow: #38bdf8;
+            
+            --status-operativo: #10b981;
+            --status-operativo-bg: rgba(16, 185, 129, 0.08);
+            --status-advertencia: #f59e0b;
+            --status-advertencia-bg: rgba(245, 158, 11, 0.08);
+            --status-critico: #ef4444;
+            --status-critico-bg: rgba(239, 68, 68, 0.08);
+            
+            --transition-normal: 0.25s ease-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            line-height: 1.5;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-bottom: 40px;
+        }
+
+        /* Header logo */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+            margin-bottom: 8px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-img {
+            height: 32px;
+            width: auto;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 8px rgba(56, 189, 248, 0.2));
+        }
+
+        .brand-text {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-blue-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-install {
+            background-color: rgba(56, 189, 248, 0.1);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue-glow);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-normal);
+        }
+
+        .btn-install:hover {
+            background-color: var(--accent-blue);
+            color: #fff;
+        }
+
+        /* Card styles */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .eq-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .eq-title {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .badge-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .badge-status.operativo {
+            background-color: var(--status-operativo-bg);
+            color: var(--status-operativo);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-status.advertencia {
+            background-color: var(--status-advertencia-bg);
+            color: var(--status-advertencia);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-status.critico {
+            background-color: var(--status-critico-bg);
+            color: var(--status-critico);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* Image Gallery */
+        .gallery-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gallery-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .gallery-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            gap: 12px;
+        }
+
+        .gallery-placeholder i {
+            font-size: 40px;
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0,0,0,0.6);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all var(--transition-normal);
+        }
+        .gallery-nav.prev { left: 10px; }
+        .gallery-nav.next { right: 10px; }
+        .gallery-nav:hover { background-color: var(--accent-blue); }
+
+        .gallery-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.4);
+            cursor: pointer;
+        }
+        .dot.active {
+            background-color: var(--accent-blue-glow);
+            width: 12px;
+            border-radius: 3px;
+        }
+
+        /* Tech Specs Grid */
+        .specs-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent-blue-glow);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .spec-item {
+            background-color: rgba(255,255,255,0.01);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .spec-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .spec-value {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        /* Checklist style */
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 12.5px;
+        }
+
+        .checklist-item i {
+            color: var(--status-operativo);
+            margin-top: 3px;
+        }
+
+        /* Timeline styles */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-item {
+            background-color: rgba(255,255,255,0.01);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .timeline-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .timeline-title {
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        .timeline-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .timeline-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.04);
+            color: var(--text-secondary);
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .error-message i {
+            font-size: 48px;
+            color: var(--status-critico);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Brand Header -->
+        <header class="header">
+            <div class="brand">
+                <img src="data/logo.png" class="brand-img" alt="MTI Logo">
+                <span class="brand-text">MTI Servicios Industriales</span>
+            </div>
+            <button class="btn-install" id="pwa-install-btn">
+                <i class="fa-solid fa-mobile-screen"></i> Instalar App
+            </button>
+        </header>
+
+        <!-- Main Dynamic Area -->
+        <div id="content-area">
+            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                <i class="fa fa-spinner fa-spin" style="font-size: 32px; margin-bottom: 12px;"></i>
+                <p>Cargando información del equipo...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Database -->
+    <script src="database.js"></script>
+    <!-- Load checklists library -->
+    <script>
+        const MTI_PAUTAS_LIBRARY = {
+            "bomba-grundfos-nb": [
+                "Evaluación visual de funcionamiento",
+                "Desconectar suministro eléctrico e instalación señal de seguridad",
+                "Estado Sello mecánico",
+                "Revisión Impulsor",
+                "Estado pernos y prisioneros",
+                "Estado ventilador y tapa",
+                "Pintado y Raspado",
+                "Lubricación",
+                "Conexión eléctrica",
+                "Sentido Giro"
+            ],
+            "bomba-grundfos-cr": [
+                "Evaluación visual de funcionamiento",
+                "Desconectar suministro eléctrico e instalación señal de seguridad",
+                "Verificar fugas en sellos mecánicos",
+                "Verificar desgaste de acoplamiento flexible",
+                "Comprobar alineación de acople motor-bomba",
+                "Verificar apriete de pernos de anclaje y bridas",
+                "Limpieza de aletas del motor",
+                "Medir resistencia de aislamiento (Megado)",
+                "Medición de vibraciones mecánicas",
+                "Medir temperatura en descansos y rodamientos",
+                "Verificación de consumo de corriente por fase",
+                "Revisión de conexiones en caja de bornes",
+                "Pintura y tratamiento anticorrosivo",
+                "Verificación de presión de succión y descarga (manómetros)",
+                "Purga de aire en la cámara de sellos"
+            ],
+            "soplador-blower": [
+                "Evaluación de nivel y estado del aceite en carcasas de engranajes",
+                "Verificación de tensión y desgaste de correas de transmisión",
+                "Inspección del filtro de aspiración de aire (limpieza/cambio)",
+                "Control de ruidos anormales y holguras mecánicas",
+                "Medición de temperatura en descansos de rodamientos",
+                "Monitoreo de presión diferencial (manómetros de entrada/salida)",
+                "Inspección de fugas de aire o aceite en sellos de ejes",
+                "Verificación de corriente consumida por el motor eléctrico",
+                "Reapriete de pernos de base y poleas",
+                "Megado de bobinado de motor de accionamiento"
+            ],
+            "chiller": [
+                "Control de presiones de refrigerante alta/baja",
+                "Inspección de fugas de gas refrigerante en circuito",
+                "Limpieza de serpentín condensador",
+                "Verificación de caudal y temperatura de agua helada (entrada/salida)",
+                "Control de nivel y acidez del aceite del compresor",
+                "Medición de consumo eléctrico por fase en compresor y ventiladores",
+                "Prueba de funcionamiento de presostatos de seguridad",
+                "Control de funcionamiento del termostato y controlador",
+                "Reapriete de conexiones eléctricas en tablero de fuerza",
+                "Inspección visual de aislamiento térmico de tuberías"
+            ],
+            "decanter-centrifugo": [
+                "Lubricación de rodamientos del rotor principal (grasa de alta velocidad)",
+                "Lubricación de caja reductora (engranajes planetarios)",
+                "Inspección de desgaste en boquillas de descarga de sólidos",
+                "Control de vibración mediante acelerómetros",
+                "Revisión de tensión de correas de transmisión de poleas",
+                "Verificación del estado del acoplamiento hidráulico o variador",
+                "Control de temperatura en descansos principales",
+                "Megado e inspección de motor principal y motor backdrive",
+                "Limpieza interna del tambor y del transportador sinfín",
+                "Revisión de apriete del anclaje antivibratorio"
+            ],
+            "filtro-tambor-rotativo": [
+                "Inspección de mallas de filtración (roturas o incrustaciones)",
+                "Limpieza a alta presión de boquillas de retrolavado",
+                "Verificación de cadena o correa de transmisión de rotación",
+                "Engrase de descansos de soporte del tambor (bujes/rodamientos)",
+                "Control del motorreductor de accionamiento (aceite y temperatura)",
+                "Verificación de sellos periféricos de caucho del tambor",
+                "Prueba de funcionamiento del flotador y sensores de nivel",
+                "Medición de consumo del motor de rotación y bomba de lavado",
+                "Limpieza y eliminación de lodos acumulados en tina",
+                "Reapriete de terminales en caja de conexiones"
+            ],
+            "caldera": [
+                "Verificación y purga diaria de columna de agua y niveles",
+                "Prueba de disparo manual de válvula de seguridad de vapor",
+                "Inspección del quemador (limpieza de boquillas y electrodos)",
+                "Control del sensor de llama (limpieza de fotocelda)",
+                "Inspección de refractarios y estanqueidad de puertas del hogar",
+                "Análisis de gases de combustión (eficiencia térmica)",
+                "Control y calibración de presostatos de trabajo y seguridad",
+                "Verificación de bombas de alimentación de agua (ruido/temperatura)",
+                "Tratamiento de agua (inspección de ablandadores e inyección química)",
+                "Megado de motores de ventilador de tiro forzado y bombas"
+            ],
+            "generador-ozono": [
+                "Inspección visual de conexiones de gas (oxígeno/ozono)",
+                "Limpieza de celdas de descarga de corona (dieléctricos)",
+                "Verificación de funcionamiento del transformador de alta tensión",
+                "Control de caudal de agua de enfriamiento en camisas",
+                "Revisión de trampas de agua y filtros secadores de aire",
+                "Medición de consumo eléctrico en la fuente de poder",
+                "Prueba de sensores de flujo y presostatos de seguridad",
+                "Calibración de destructor de ozono residual",
+                "Revisión de conexiones en panel de control PLC",
+                "Verificación de sensores de ozono ambiental de seguridad"
+            ]
+        };
+
+        function getChecklistForEquipment(nombre, area) {
+            const nameLower = nombre.toLowerCase();
+            if (nameLower.includes("nb") && nameLower.includes("bomba")) return MTI_PAUTAS_LIBRARY["bomba-grundfos-nb"];
+            if (nameLower.includes("cr") && nameLower.includes("bomba")) return MTI_PAUTAS_LIBRARY["bomba-grundfos-cr"];
+            if (nameLower.includes("bomba") || nameLower.includes("bba") || nameLower.includes("pompe")) return MTI_PAUTAS_LIBRARY["bomba-grundfos-cr"];
+            if (nameLower.includes("blower") || nameLower.includes("soplador")) return MTI_PAUTAS_LIBRARY["soplador-blower"];
+            if (nameLower.includes("chiller")) return MTI_PAUTAS_LIBRARY["chiller"];
+            if (nameLower.includes("decanter") || nameLower.includes("alfa")) return MTI_PAUTAS_LIBRARY["decanter-centrifugo"];
+            if (nameLower.includes("filtro") && (nameLower.includes("tambor") || nameLower.includes("ftr"))) return MTI_PAUTAS_LIBRARY["filtro-tambor-rotativo"];
+            if (nameLower.includes("caldera")) return MTI_PAUTAS_LIBRARY["caldera"];
+            if (nameLower.includes("ozono")) return MTI_PAUTAS_LIBRARY["generador-ozono"];
+            
+            return [
+                "Inspección visual y limpieza exterior de la unidad",
+                "Desconexión eléctrica y comprobación de seguridad del entorno",
+                "Reapriete de conexiones en bornera y tablero de control",
+                "Medición de temperatura superficial y de rodamientos",
+                "Medición de corriente (Amperaje) en carga por fase",
+                "Verificación de ruidos anormales y vibraciones mecánicas",
+                "Inspección de acoplamientos, poleas y transmisiones",
+                "Comprobación de anclajes a base y pernos de sujeción",
+                "Megado (resistencia de aislamiento) de devanados",
+                "Entrega de equipo operativo y limpieza de zona de trabajo"
+            ];
+        }
+    </script>
+
+    <!-- Main Logic -->
+    <script>
+        let currentImageIndex = 0;
+        let equipmentImages = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderEquipmentDetail();
+            setupPwaInstall();
+        });
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        function renderEquipmentDetail() {
+            const container = document.getElementById('content-area');
+            const eqId = getQueryParam('eqId');
+
+            if (!eqId) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <h2>Parámetro Ausente</h2>
+                        <p>No se especificó un ID de equipo en el código QR.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Load database
+            let db = window.DB_PISCICULTURA;
+            
+            // Check if we have remote Cloudflare sync or offline database in localStorage
+            const savedRaw = localStorage.getItem('PISCICULTURA_CONSOLIDATED_RAW');
+            if (savedRaw) {
+                try {
+                    db = JSON.parse(savedRaw);
+                } catch (e) {
+                    console.error("Error reading localStorage DB", e);
+                }
+            }
+
+            if (!db || !db.Equipos) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fa-solid fa-database"></i>
+                        <h2>Error de Base de Datos</h2>
+                        <p>No se pudo cargar la base de datos de equipos.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const eq = db.Equipos.find(e => e.id === eqId);
+            if (!eq) {
+                container.innerHTML = `
+                    <div class="error-message">
+                        <i class="fa-solid fa-circle-question"></i>
+                        <h2>Equipo No Encontrado</h2>
+                        <p>El equipo con ID <strong>${eqId}</strong> no está registrado en la base de datos de esta planta.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Set images list
+            equipmentImages = eq.imagenes ? [...eq.imagenes] : (eq.imagen ? [eq.imagen] : []);
+            currentImageIndex = 0;
+
+            // Setup Badge Class
+            let badgeClass = 'operativo';
+            let statusLabel = 'Operativo';
+            if (eq.estado === 'Requiere Revisión') {
+                badgeClass = 'advertencia';
+                statusLabel = 'Revisión';
+            } else if (eq.estado === 'Crítico') {
+                badgeClass = 'critico';
+                statusLabel = 'Falla / Parada';
+            }
+
+            // Build specifications HTML
+            const specsHtml = `
+                <div class="specs-section-title"><i class="fa-solid fa-circle-info"></i> Datos Generales</div>
+                <div class="specs-grid">
+                    <div class="spec-item"><span class="spec-label">Ubicación / Área</span><span class="spec-value">${eq.area}</span></div>
+                    <div class="spec-item"><span class="spec-label">Designación</span><span class="spec-value">${eq.designacion || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Cantidad Consolidada</span><span class="spec-value">${eq.cantidad || 1} un.</span></div>
+                    <div class="spec-item"><span class="spec-label">Horas Operación Diarias</span><span class="spec-value">${eq.horasFuncionamiento || 8} hrs</span></div>
+                    <div class="spec-item"><span class="spec-label">Cliente / Piscicultura</span><span class="spec-value">${eq.cliente || 'Cermaq'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Centro de Cultivo</span><span class="spec-value">${eq.centro || 'Sta Juana'}</span></div>
+                </div>
+
+                <div class="specs-section-title"><i class="fa-solid fa-bolt"></i> Especificaciones Eléctricas</div>
+                <div class="specs-grid">
+                    <div class="spec-item"><span class="spec-label">Marca Motor</span><span class="spec-value">${eq.marca || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Modelo Motor</span><span class="spec-value">${eq.modelo || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">N° de Serie</span><span class="spec-value">${eq.serie || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Potencia nominal</span><span class="spec-value">${eq.potencia || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Voltaje nominal</span><span class="spec-value">${eq.voltaje || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Corriente (Amperaje)</span><span class="spec-value">${eq.amperaje || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Tipo de Conexión</span><span class="spec-value">${eq.conexion || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Coseno Fi (cos φ)</span><span class="spec-value">${eq.cos_fi || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Calibre Cable AWG</span><span class="spec-value">${eq.cable_awg || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Velocidad (RPM)</span><span class="spec-value">${eq.rpm || '—'}</span></div>
+                </div>
+
+                <div class="specs-section-title"><i class="fa-solid fa-gears"></i> Componentes y Repuestos</div>
+                <div class="specs-grid">
+                    <div class="spec-item"><span class="spec-label">Rodamientos Principales</span><span class="spec-value">${(eq.rodamientos || []).join(', ') || 'Sin rodamientos'}</span></div>
+                    <div class="spec-item" style="grid-column: 1 / -1;"><span class="spec-label">Repuestos Críticos Adicionales</span><span class="spec-value">${eq.repuestos || 'No declarados'}</span></div>
+                </div>
+
+                <div class="specs-section-title"><i class="fa-solid fa-calendar-days"></i> Mantenimiento Preventivo</div>
+                <div class="specs-grid">
+                    <div class="spec-item"><span class="spec-label">Último Mantenimiento</span><span class="spec-value">${eq.ultima_mantencion || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Próximo Mantenimiento</span><span class="spec-value" style="color: var(--status-advertencia); font-weight: 700;">${eq.proxima_mantencion || '—'}</span></div>
+                    <div class="spec-item"><span class="spec-label">Frecuencia Rutina</span><span class="spec-value">Cada ${eq.frecuencia_meses || 6} Meses</span></div>
+                    <div class="spec-item"><span class="spec-label">Criticidad Predictiva</span><span class="spec-value">${eq.criticidad || 'Baja'}</span></div>
+                </div>
+            `;
+
+            // Build Checklist items
+            const pautas = getChecklistForEquipment(eq.nombre, eq.area);
+            const pautasHtml = pautas.map(item => `
+                <div class="checklist-item">
+                    <i class="fa-regular fa-square-check"></i>
+                    <span>${item}</span>
+                </div>
+            `).join('');
+
+            // Build history timeline
+            let historyEntries = [];
+
+            // 1. OTs
+            (db.HistorialGlobal || []).filter(h => (h.eqId || h.id) === eqId).forEach(h => {
+                historyEntries.push({
+                    fecha: h.fecha,
+                    titulo: h.trabajo || h.tarea || 'Orden de Trabajo',
+                    desc: h.comentarios || h.detalles || '',
+                    tecnico: h.tecnico || 'Técnico MTI',
+                    tipo: 'OT Mantenimiento',
+                    color: 'var(--accent-blue-glow)',
+                    detalles: `${h.tiempoReparacion || h.horas || 0} hrs`
+                });
+            });
+
+            // 2. Legacy Audits
+            (eq.antecedentes || []).forEach(h => {
+                historyEntries.push({
+                    fecha: h.fecha,
+                    titulo: h.trabajo || h.tarea || 'Auditoría',
+                    desc: h.detalles || h.comentarios || '',
+                    tecnico: h.tecnico || 'Auditoría Planta',
+                    tipo: 'Antecedente / Referencia',
+                    color: 'var(--text-muted)',
+                    detalles: h.rodamientos && h.rodamientos.length > 0 ? `Rods: ${h.rodamientos.join(', ')}` : ''
+                });
+            });
+
+            // Sort descending
+            historyEntries.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+            let historyHtml = '';
+            if (historyEntries.length === 0) {
+                historyHtml = `<div style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px 0;"><i class="fa-regular fa-folder-open" style="font-size: 20px; display: block; margin-bottom: 8px;"></i>Sin registros históricos.</div>`;
+            } else {
+                historyHtml = historyEntries.map(e => {
+                    let formattedDate = e.fecha || '';
+                    if (formattedDate.includes('-')) {
+                        const parts = formattedDate.split('-');
+                        formattedDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+                    return `
+                        <div class="timeline-item">
+                            <div class="timeline-meta">
+                                <span class="timeline-badge" style="color: ${e.color};">${e.tipo}</span>
+                                <span>${formattedDate}</span>
+                            </div>
+                            <div class="timeline-title">${e.titulo}</div>
+                            ${e.desc ? `<div class="timeline-desc">${e.desc}</div>` : ''}
+                            <div class="timeline-meta" style="margin-top: 4px;">
+                                <span><i class="fa fa-user"></i> ${e.tecnico}</span>
+                                ${e.detalles ? `<span>${e.detalles}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render overall UI
+            container.innerHTML = `
+                <div class="card">
+                    <!-- Title row -->
+                    <div class="card-header-row">
+                        <div class="title-group">
+                            <span class="eq-id">${eq.id}</span>
+                            <h2 class="eq-title">${eq.nombre}</h2>
+                        </div>
+                        <span class="badge-status ${badgeClass}">${statusLabel}</span>
+                    </div>
+
+                    <!-- Gallery -->
+                    <div class="gallery-wrapper" id="eq-gallery">
+                        <!-- Loaded dynamically -->
+                    </div>
+
+                    <!-- Specifications -->
+                    ${specsHtml}
+                </div>
+
+                <!-- Pautas Card -->
+                <div class="card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-list-check" style="color: var(--accent-blue-glow);"></i>
+                        Pauta Técnica MTI (Chequeo Preventivo)
+                    </h3>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Puntos reglamentados de inspección y control de terreno.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${pautasHtml}
+                    </div>
+                </div>
+
+                <!-- History Card -->
+                <div class="card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-blue-glow);"></i>
+                        Historial de Intervenciones
+                    </h3>
+                    <div class="timeline" style="margin-top: 8px;">
+                        ${historyHtml}
+                    </div>
+                </div>
+            `;
+
+            renderGallery();
+            fetchCloudflareDatabaseIfOnline(eqId);
+        }
+
+        function renderGallery() {
+            const gallery = document.getElementById('eq-gallery');
+            if (!gallery) return;
+
+            if (equipmentImages.length === 0) {
+                gallery.innerHTML = `
+                    <div class="gallery-placeholder">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Sin fotos registradas</span>
+                    </div>
+                `;
+                return;
+            }
+
+            const imgPath = equipmentImages[currentImageIndex];
+            
+            let navHtml = '';
+            if (equipmentImages.length > 1) {
+                navHtml = `
+                    <button class="gallery-nav prev" onclick="navigateGallery(-1)">&lt;</button>
+                    <button class="gallery-nav next" onclick="navigateGallery(1)">&gt;</button>
+                    <div class="gallery-indicators">
+                        ${equipmentImages.map((_, i) => `<span class="dot ${i === currentImageIndex ? 'active' : ''}" onclick="setGalleryIndex(${i})"></span>`).join('')}
+                    </div>
+                `;
+            }
+
+            gallery.innerHTML = `
+                <img src="${imgPath}" class="gallery-img" alt="Foto del equipo" onerror="this.src='data/logo.png'; this.style.opacity='0.2';" />
+                ${navHtml}
+            `;
+        }
+
+        window.navigateGallery = function(direction) {
+            currentImageIndex = (currentImageIndex + direction + equipmentImages.length) % equipmentImages.length;
+            renderGallery();
+        };
+
+        window.setGalleryIndex = function(index) {
+            currentImageIndex = index;
+            renderGallery();
+        };
+
+        // Live Sychronization check for Cloudflare
+        function fetchCloudflareDatabaseIfOnline(eqId) {
+            if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && window.location.hostname !== '') {
+                fetch('/api/database')
+                    .then(res => {
+                        if (res.ok) return res.json();
+                        throw new Error('Not OK');
+                    })
+                    .then(onlineDb => {
+                        if (onlineDb && onlineDb.Equipos) {
+                            const currentLocalRaw = localStorage.getItem('PISCICULTURA_CONSOLIDATED_RAW');
+                            if (JSON.stringify(onlineDb) !== currentLocalRaw) {
+                                localStorage.setItem('PISCICULTURA_CONSOLIDATED_RAW', JSON.stringify(onlineDb));
+                                console.log("Database synced from Cloudflare remotely. Re-rendering...");
+                                renderEquipmentDetail();
+                            }
+                        }
+                    })
+                    .catch(err => console.log("Running offline or local server fallback active.", err));
+            }
+        }
+
+        // PWA Install Prompt handling
+        function setupPwaInstall() {
+            let deferredPrompt;
+            const installBtn = document.getElementById('pwa-install-btn');
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (installBtn) {
+                    installBtn.style.display = 'inline-flex';
+                }
+            });
+
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`PWA Installation Choice: ${outcome}`);
+                        deferredPrompt = null;
+                        installBtn.style.display = 'none';
+                    }
+                });
+            }
+
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA installed successfully');
+                if (installBtn) {
+                    installBtn.style.display = 'none';
+                }
+            });
+
+            if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                if (installBtn) {
+                    installBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+                    .catch(err => console.error('Error al registrar Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>

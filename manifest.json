@@ -1,0 +1,21 @@
+{
+  "name": "MTI CMMS Piscicultura",
+  "short_name": "MTI CMMS",
+  "description": "Gestión de Mantenimiento de Motores Industriales - MTI",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#050506",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "data/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "data/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
